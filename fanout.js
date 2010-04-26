@@ -34,8 +34,6 @@ var handleMessage = function handleMessage(conn, socket, data) {
   sys.puts('[' + conn.name + ']' + ' data: ' + data);
   if (data == "time") {
     socket.write(Date.now() + "\n");
-  } else if (data == "resp!hello") {
-    socket.write("resp!hi there\n");
   }
   if (data.indexOf("subscribe ") == 0) {
     conn.addchannel(data.split(' ')[1]);
@@ -74,13 +72,6 @@ Client.prototype.removechannel = function(channel) {
   
   /* remove channel if it exists */
   this.channels.remove(channel);
-  /*
-    for(var i = 0; i < this.channels.length; i++) {
-    if(channel == this.channels[i]) {
-    this.channels.splice(i, 1);
-    }
-    }
-  */
   
   /* remove listener */
   var listener = this.listeners[channel];
