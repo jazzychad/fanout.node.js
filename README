@@ -1,0 +1,229 @@
+
+  / _| __ _ _ __   ___  _   _| |_    (_)___ 
+ | |_ / _` | '_ \ / _ \| | | | __|   | / __|
+ |  _| (_| | | | | (_) | |_| | |_ _  | \__ \
+ |_|  \__,_|_| |_|\___/ \__,_|\__(_)_/ |___/
+                                   |__/     
+================================================================================
+
+         1         2         3         4         5         6         7         8
+1...5....0....5....0....5....0....5....0....5....0....5....0....5....0....5....0
+
+fanout.js - a simple and robust fanout pubsub
+messaging server for node.js by @jazzychad
+
+MOTIVATION
+==========
+I needed a robust and scalable event-driven message fanout server for several
+Comet-based webapps where some process in the backend could send various
+messages of different types/channels to the clients (browsers) in the front-end.
+fanout.js implements such a server using standard TCP sockets so that it can be
+used in a wide variety of applications. Connection to web browsers is 
+accomplished by using the TCPSocket absctraction in the Orbited.org project.
+
+OVERVIEW
+========
+
+The fanout pubsub system consists of three parts
+ o The "fanout server" itself
+ o One or more "Clients" (message subscribers)
+ o One or more "Controllers" (message publishers)
+
+The fanout server is run as a node.js process. Clients connect to the server on
+the client port (default 8880). Controllers connect to the server on the
+controller port (default 8890).
+
+Clients can do 4 (four) things:
+ o Subscribe to message channels
+ o Unsubscribe from message channels
+ o Receive messages on subscribed message channels
+ o Ping the fanout server for the current unix militime
+
+Controllers can do 1 (one) thing:
+ o Send (publish) messages on message channels
+
+Upon connection, each Client is automatically subscribed to the "all" message
+channel, so that if a Controller publishes a message to the "all" message
+channel, each Client will receive it. This is useful for sending system-wide
+messages to all connected clients. Clients can choose to unsubscribe from the
+"all" channel if they so choose. Also upon connection, each client will receive
+a message on the "debug" message channel notifying them that they have connected
+to the server.
+
+CLIENT PROTOCOL
+===============
+
+  Subscribing
+  -----------
+  Clients subscribe to a message channel by sending a message of the format:
+
+  subscribe<space><channel_name>
+
+  Message channel names are one work tokens which may not include spaces.
+
+  Example:
+
+  subscribe foo
+
+  will subscribe to the client to the message channel called foo
+
+  If a client subscribes to a channel for which it is already subscribed,
+  the duplicate subscribe request is effectively ignored.
+
+  Unsubscribing
+  -------------
+  Client unsubscribe to a message channel by sending a message of the format:
+
+  unsubscribe<space><channel_name>
+
+  The message channel name must match exactly the name of the channel to which
+  the client is already subscribed (it is case-sensitive). 
+
+  Example:
+
+  unsubscribe foo
+
+  will unsubscribe the client from the message channel called foo
+
+
+  Sending an unsubscribe request for a message channel to which the client is 
+  not already subscribed is effectively treated as a no-op.
+
+
+  Ping the Server
+  ---------------
+  Clients may ping the fanout server by sending a special message:
+
+  time
+
+  The server will respond with the current time as miliseconds elapsed since
+  the Unix Epoch.
+
+
+  Receiving Messages
+  ------------------
+  Once a Client subscribes to one or more message channels, when a Controller
+  publishes messages to those specific channels, the Client will automatically
+  receive the message in the format:
+
+  <channel_name>!<message><newline_character>
+
+  Example:
+
+  A controller sends the message "hello, world" to the message channel "foo".
+  The clients subscribed to "foo" will receive the following message:
+
+  foo!hello, world
+
+  (including a final newline character to signify the end of the message).
+
+
+CONTROLLER PROTOCOL
+===================
+
+  Publishing a Message
+  --------------------
+
+  Controllers publish messages to message channels in the following format:
+
+  <channel_name><space><message><newline>
+
+  Example:
+
+  A Controller wants to send the message "hello, world" to the message
+  channel called "foo".
+
+  foo hello, world
+
+  (including a final newline character to signify the end of the message).
+
+  The first word of Controller messages is always taken to mean the destination
+  message channel. Everything after the first space is taken as the message
+  to publish on that channel.
+
+  Message channels are "soft" in that they do not need to be declared or
+  otherwise created prior to publishing messages on them. If a Controller 
+  publishes a message to a channel with no subscribers, the message is 
+  effectively dropped.
+
+
+USAGE
+=====
+
+Assuming you have installed node.js on your machine/server, all you need 
+is this:
+
+  node fanout.js
+
+
+EXAMPLE
+=======
+
+Open 4 (four) terminal windows.
+
+In Terminal 1, run fanout.js
+
+  node fanout.js
+
+In Terminal 2, connect as a Controller
+
+  netcat localhost 8890
+
+In Terminal 3, connect as a Client
+
+  netcat localhost 8880
+
+In Terminal 4, connect as another Client
+
+  netcat localhost 8880
+
+In terminal 2, type
+
+  all hello everybody
+
+and hit return. You should see "all!hello everybody" appear in both 
+Terminal 3 and 4.
+
+In Terminal 3, type
+
+  subscribe aaa
+
+and hit return. In Terminal 4, type
+
+  subscribe bbb
+
+and hit return.
+
+In Terminal 2, type
+
+  aaa only one client should see this
+
+and hit return. You should see the message received by Terminal 3.
+
+In Terminal 2, type
+
+  bbb only the other client should see this
+
+and hit return. You should see the message received by Terminal 4.
+
+In Terminal 2, type
+
+  ccc nobody should see this message
+
+and hit return. Since there are no subscribers to the "ccc" channel, it will
+not be received by any clients.
+
+In Terminal 3, type
+
+  unsubscribe aaa
+
+and hit return. In Terminal 2, type
+
+  aaa will anyone see this now? nope...
+
+and hit return. Since Terminal 3 just unsubscribed from "aaa" it should not
+receive the message.
+
+Continue experimenting with different subscribe/unsubscribe commands from the
+Clients and publishing different messages on different channels with the
+Controller. You should figure out the basic use rather quickly.
