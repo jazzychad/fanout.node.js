@@ -2,6 +2,7 @@
  * fanout.js
  * a fanout messaging server for node.js
  * by @jazzychad - Chad Etzel
+ * MIT Licensed
  */
 
 var tcp = require("net"),
