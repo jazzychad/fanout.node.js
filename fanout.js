@@ -38,7 +38,7 @@ var handleMessage = function handleMessage(conn, socket, data) {
   if (data.indexOf("subscribe ") == 0) {
     conn.addchannel(data.split(' ')[1]);
     conn.subscribe();
-  } else if (data.indexOf("unsubscribe") == 0) {
+  } else if (data.indexOf("unsubscribe ") == 0) {
     conn.removechannel(data.split(' ')[1]);
     /* update subscriptions by calling subscribe */
     conn.subscribe();
