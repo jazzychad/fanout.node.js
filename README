@@ -37,7 +37,7 @@ Clients can do 4 (four) things:
  o Subscribe to message channels
  o Unsubscribe from message channels
  o Receive messages on subscribed message channels
- o Ping the fanout server for the current unix militime
+ o Ping the fanout server for the current unix millitime
 
 Controllers can do 1 (one) thing:
  o Send (publish) messages on message channels
@@ -59,7 +59,7 @@ CLIENT PROTOCOL
 
   subscribe<space><channel_name>
 
-  Message channel names are one work tokens which may not include spaces.
+  Message channel names are one word tokens which may not include spaces.
 
   Example:
 
@@ -85,7 +85,6 @@ CLIENT PROTOCOL
 
   will unsubscribe the client from the message channel called foo
 
-
   Sending an unsubscribe request for a message channel to which the client is 
   not already subscribed is effectively treated as a no-op.
 
@@ -96,7 +95,7 @@ CLIENT PROTOCOL
 
   time
 
-  The server will respond with the current time as miliseconds elapsed since
+  The server will respond with the current time as milliseconds elapsed since
   the Unix Epoch.
 
 
