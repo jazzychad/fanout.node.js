@@ -139,8 +139,6 @@ var server = tcp.createServer(function(socket) {
           var dataline = dataarr[jj];
           handleMessage(conn, socket, dataline);
         }
-
-        //handleMessage(conn, socket, data);
       });
     socket.addListener("eof", function() {
         socket.close();
