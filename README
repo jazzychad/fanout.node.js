@@ -19,7 +19,7 @@ Comet-based webapps where some process in the backend could send various
 messages of different types/channels to the clients (browsers) in the front-end.
 fanout.js implements such a server using standard TCP sockets so that it can be
 used in a wide variety of applications. Connection to web browsers is 
-accomplished by using the TCPSocket absctraction in the Orbited.org project.
+accomplished by using the TCPSocket abstraction in the Orbited.org project.
 
 I have serveral webapps using this system. One has been running strong for
 5 months without ever having to restart the node.js process.
