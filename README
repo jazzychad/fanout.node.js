@@ -21,6 +21,8 @@ fanout.js implements such a server using standard TCP sockets so that it can be
 used in a wide variety of applications. Connection to web browsers is 
 accomplished by using the TCPSocket abstraction in the Orbited.org project.
 
+For a live example of fanout.js in use, check out http://4squarevision.com/
+
 I have serveral webapps using this system. One has been running strong for
 5 months without ever having to restart the node.js process.
 
