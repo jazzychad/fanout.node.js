@@ -11,9 +11,15 @@
 
 fanout.js - a simple and robust fanout pubsub
 messaging server for node.js by @jazzychad
+modifications by @realistschuckle
 
-MOTIVATION
-==========
+MOTIVATION by @realistschuckle
+==============================
+I liked fanout.js but wanted hierarchichal subscriptions like the JMS
+specification provides. This fork provides that.
+
+MOTIVATION by @jazzychad
+========================
 I needed a robust and scalable event-driven message fanout server for several
 Comet-based webapps where some process in the backend could send various
 messages of different types/channels to the clients (browsers) in the front-end.
@@ -74,6 +80,19 @@ CLIENT PROTOCOL
 
   If a client subscribes to a channel for which it is already subscribed,
   the duplicate subscribe request is effectively ignored.
+
+  Example:
+
+  subscribe >
+
+  will subscribe to all messages
+
+  Example:
+
+  subscribe foo.bar.>
+
+  will subscribe to all messages published to any channel that begins with
+  "foo.bar.".
 
   Unsubscribing
   -------------

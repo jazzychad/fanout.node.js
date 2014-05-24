@@ -46,9 +46,28 @@ var handleMessage = function handleMessage(conn, socket, data) {
   }
 };
 
-var handleControllerMessage = function handleControllerMessage(socket, channel, data) {
-  msgEmitter.emit(channel, channel, data);
+var handleControllerMessage = function handleControllerMessage(socket, channel, data, sourceChannel) {
+  msgEmitter.emit(channel, sourceChannel || channel, data);
 };
+
+function Channel(name) {
+  var parents = [],
+      nameParts = name.split('.');
+  for(var i = nameParts.length - 1; i >= 0; i -= 1) {
+    nameParts[i] = '>';
+    parents.push(nameParts.join('.'));
+    nameParts.splice(i, 1);
+  }
+
+  this.publish = function(socket, data) {
+    handleControllerMessage(socket, name, data);
+    parents.forEach(function(parentChannel) {
+      handleControllerMessage(socket, parentChannel, data, name);
+    });
+  }
+
+  return this;
+}
 
 function Client(connection) {
   this.socket = connection;
@@ -177,9 +196,9 @@ var controller = tcp.createServer(function(socket) {
         for (var jj = 0; jj < dataarr.length-1; jj++) {
           var dataline = dataarr[jj];
           var i = dataline.indexOf(' ');
-          var channel = dataline.slice(0,i);
+          var channel = new Channel(dataline.slice(0,i));
           var msg = dataline.slice(i+1);
-          handleControllerMessage(socket, channel, msg);
+          channel.publish(socket, msg);
         }
       });
   });
